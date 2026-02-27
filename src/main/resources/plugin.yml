@@ -1,0 +1,17 @@
+name: TERIE-Fascript
+version: '1.0.0'
+main: dev.terie.fascript.FascriptPlugin
+description: A Lightweight Script Language by Team TERIE.
+api-version: '1.21.10'
+author: Team TERIE (BACKGWA)
+
+commands:
+  fascript:
+    description: Fascript 스크립트 언어 명령어
+    usage: /fascript <enable|disable|execute|interpret|list|reload>
+    permission: fascript.use
+
+permissions:
+  fascript.use:
+    description: Fascript 명령어 사용 권한
+    default: op
