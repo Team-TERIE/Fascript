@@ -1,0 +1,131 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Fascript",
+  "scopeName": "source.fascript",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#query-string-double" },
+    { "include": "#query-string-single" },
+    { "include": "#string-double" },
+    { "include": "#string-single" },
+    { "include": "#number" },
+    { "include": "#boolean" },
+    { "include": "#declaration-keyword" },
+    { "include": "#control-keyword" },
+    { "include": "#type-keyword" },
+    { "include": "#scope-modifier" },
+    { "include": "#builtin-function" },
+    { "include": "#special-variable" },
+    { "include": "#operator" }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.line.double-slash.fascript",
+      "match": "//.*$"
+    },
+
+    "query-string-double": {
+      "name": "string.interpolated.fascript",
+      "begin": "\\$\"",
+      "end": "\"",
+      "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.fascript" } },
+      "endCaptures":   { "0": { "name": "punctuation.definition.string.end.fascript" } },
+      "patterns": [
+        { "include": "#string-escape" },
+        { "include": "#interpolation" }
+      ]
+    },
+
+    "query-string-single": {
+      "name": "string.interpolated.fascript",
+      "begin": "\\$'",
+      "end": "'",
+      "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.fascript" } },
+      "endCaptures":   { "0": { "name": "punctuation.definition.string.end.fascript" } },
+      "patterns": [
+        { "include": "#string-escape" },
+        { "include": "#interpolation" }
+      ]
+    },
+
+    "interpolation": {
+      "name": "meta.interpolation.fascript",
+      "begin": "\\{",
+      "end": "\\}",
+      "beginCaptures": { "0": { "name": "punctuation.section.interpolation.begin.fascript" } },
+      "endCaptures":   { "0": { "name": "punctuation.section.interpolation.end.fascript" } },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#number" },
+        { "include": "#boolean" },
+        { "include": "#builtin-function" },
+        { "include": "#special-variable" },
+        { "include": "#operator" }
+      ]
+    },
+
+    "string-double": {
+      "name": "string.quoted.double.fascript",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [{ "include": "#string-escape" }]
+    },
+
+    "string-single": {
+      "name": "string.quoted.single.fascript",
+      "begin": "'",
+      "end": "'",
+      "patterns": [{ "include": "#string-escape" }]
+    },
+
+    "string-escape": {
+      "name": "constant.character.escape.fascript",
+      "match": "\\\\[ntr\"'\\\\]"
+    },
+
+    "number": {
+      "name": "constant.numeric.fascript",
+      "match": "\\b\\d+(\\.\\d+)?\\b"
+    },
+
+    "boolean": {
+      "name": "constant.language.boolean.fascript",
+      "match": "\\b(true|false)\\b"
+    },
+
+    "declaration-keyword": {
+      "name": "keyword.other.declaration.fascript",
+      "match": "\\b(function|listener|interval)\\b"
+    },
+
+    "control-keyword": {
+      "name": "keyword.control.fascript",
+      "match": "\\b(if|else|foreach|in|while|break|return)\\b"
+    },
+
+    "type-keyword": {
+      "name": "storage.type.fascript",
+      "match": "\\b(number|string|boolean|list|object)\\b"
+    },
+
+    "scope-modifier": {
+      "name": "storage.modifier.fascript",
+      "match": "\\b(public|private)\\b"
+    },
+
+    "builtin-function": {
+      "name": "support.function.builtin.fascript",
+      "match": "\\b(broadcast|message|execute|delay|getAllPlayer|getPlayerUUID|getBlockData|getEntityData|setGlobalStorage|getGlobalStorage|setStorage|getStorage|intervalPause|intervalResume|intervalDestroy|destroyListener)\\b"
+    },
+
+    "special-variable": {
+      "name": "variable.language.fascript",
+      "match": "\\b(args|params)\\b"
+    },
+
+    "operator": {
+      "name": "keyword.operator.fascript",
+      "match": "\\+\\+|--|\\+=|-=|\\*=|/=|%=|==|!=|<=|>=|[+\\-*/%<>=!]"
+    }
+  }
+}
