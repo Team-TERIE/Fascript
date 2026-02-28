@@ -134,7 +134,13 @@ class FascriptPlugin : JavaPlugin() {
             if (playerName != null) {
                 Bukkit.getPlayerExact(playerName)?.performCommand(cmd)
             } else {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
+                val silentSender = object : org.bukkit.command.ConsoleCommandSender by Bukkit.getConsoleSender() {
+                    override fun sendMessage(message: String) = Unit
+                    override fun sendMessage(vararg messages: String) = Unit
+                    override fun sendMessage(message: net.kyori.adventure.text.Component) = Unit
+                    override fun sendMessage(source: net.kyori.adventure.identity.Identity, message: net.kyori.adventure.text.Component, type: net.kyori.adventure.audience.MessageType) = Unit
+                }
+                Bukkit.dispatchCommand(silentSender, cmd)
             }
             FascriptValue.FNull
         }
