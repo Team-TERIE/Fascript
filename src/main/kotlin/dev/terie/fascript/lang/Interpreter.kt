@@ -10,6 +10,11 @@ class Interpreter(
     capturedScopes: List<MutableMap<String, FascriptValue>> = emptyList()
 ) {
 
+    // delay()가 함수 내부에서 발생했을 때 연속 실행을 예약하는 콜백입니다.
+    // 설정된 경우, callUserFunction에서 DelaySignal을 상위로 전파하지 않고
+    // 이 콜백으로 예약한 뒤 호출부(인터벌 바디 등)가 계속 실행됩니다.
+    internal var delayScheduler: ((DelaySignal) -> Unit)? = null
+
     // 스코프 스택. 가장 앞이 현재 스코프입니다.
     // context.globalScope를 최상위 스코프로 공유하여 인터벌 간 변수 상태를 유지합니다.
     // capturedScopes가 있으면 delay 이후 재개를 위해 지역 스코프를 복원합니다.
@@ -256,6 +261,12 @@ class Interpreter(
             FascriptValue.FNull
         } catch (ret: ReturnSignal) {
             ret.value
+        } catch (d: DelaySignal) {
+            // delayScheduler가 있으면 함수 바디의 연속 실행을 예약하고 정상 반환합니다.
+            // 덕분에 호출부(인터벌 바디 등)의 다음 문장이 계속 실행됩니다.
+            // 없으면 상위로 전파합니다 (기존 동작).
+            delayScheduler?.let { it(d) } ?: throw d
+            FascriptValue.FNull
         } finally {
             popScope()
         }

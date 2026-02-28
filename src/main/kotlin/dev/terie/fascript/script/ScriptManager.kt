@@ -84,6 +84,7 @@ class ScriptManager(private val plugin: FascriptPlugin) {
         val tokens = Lexer(source).tokenize()
         val ast = Parser(tokens).parse()
         val interp = Interpreter(ctx, args)
+        interp.delayScheduler = { d -> scheduleDelayed(d, ctx, args) }
 
         try {
             interp.execute(ast)
@@ -106,6 +107,7 @@ class ScriptManager(private val plugin: FascriptPlugin) {
         val ticks = (signal.millis / 50L).coerceAtLeast(1L)
         plugin.server.scheduler.runTaskLater(plugin, Runnable {
             val contInterp = Interpreter(ctx, args, signal.capturedScopes)
+            contInterp.delayScheduler = { d -> scheduleDelayed(d, ctx, args) }
             try {
                 contInterp.executeStatements(signal.remaining)
             } catch (d: DelaySignal) {

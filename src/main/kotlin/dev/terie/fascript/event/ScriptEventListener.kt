@@ -38,6 +38,7 @@ class ScriptEventListener(
     // 이벤트 발생 시 Fascript 코드를 실행합니다.
     private fun dispatch(eventObj: FascriptValue) {
         val interp = Interpreter(ctx, emptyList())
+        interp.delayScheduler = { d -> scheduleDelayed(d, eventObj) }
         interp.setGlobalVar(decl.paramsName, eventObj)
         try {
             interp.executeStatements(decl.body)
@@ -53,6 +54,7 @@ class ScriptEventListener(
         val ticks = (signal.millis / 50L).coerceAtLeast(1L)
         plugin.server.scheduler.runTaskLater(plugin, Runnable {
             val contInterp = Interpreter(ctx, emptyList(), signal.capturedScopes)
+            contInterp.delayScheduler = { d -> scheduleDelayed(d, eventObj) }
             contInterp.setGlobalVar(decl.paramsName, eventObj)
             try {
                 contInterp.executeStatements(signal.remaining)
