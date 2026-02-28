@@ -137,8 +137,15 @@ class FascriptPlugin : JavaPlugin() {
                 val silentSender = object : org.bukkit.command.ConsoleCommandSender by Bukkit.getConsoleSender() {
                     override fun sendMessage(message: String) = Unit
                     override fun sendMessage(vararg messages: String) = Unit
+                    override fun sendMessage(senderId: java.util.UUID?, message: String) = Unit
+                    override fun sendMessage(senderId: java.util.UUID?, vararg messages: String) = Unit
                     override fun sendMessage(message: net.kyori.adventure.text.Component) = Unit
                     override fun sendMessage(source: net.kyori.adventure.identity.Identity, message: net.kyori.adventure.text.Component, type: net.kyori.adventure.audience.MessageType) = Unit
+                    override fun sendMessage(source: net.kyori.adventure.identity.Identified, message: net.kyori.adventure.text.Component, type: net.kyori.adventure.audience.MessageType) = Unit
+                    override fun spigot() = object : org.bukkit.command.CommandSender.Spigot() {
+                        override fun sendMessage(vararg components: net.md_5.bungee.api.chat.BaseComponent) = Unit
+                        override fun sendMessage(sender: java.util.UUID?, vararg components: net.md_5.bungee.api.chat.BaseComponent) = Unit
+                    }
                 }
                 Bukkit.dispatchCommand(silentSender, cmd)
             }
