@@ -62,4 +62,9 @@ class ReturnSignal(val value: FascriptValue) : Throwable()
 class BreakSignal : Throwable()
 
 // delay() 호출 후 남은 구문들을 지연 실행하기 위한 신호입니다.
-class DelaySignal(val millis: Long, val remaining: List<Node>) : Throwable()
+// capturedScopes: delay 시점의 지역 스코프 스냅샷 (전역 제외, 안쪽→바깥쪽 순서)
+class DelaySignal(
+    val millis: Long,
+    val remaining: List<Node>,
+    val capturedScopes: List<MutableMap<String, FascriptValue>> = emptyList()
+) : Throwable()

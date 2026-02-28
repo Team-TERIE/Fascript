@@ -52,7 +52,7 @@ class ScriptEventListener(
     private fun scheduleDelayed(signal: DelaySignal, eventObj: FascriptValue) {
         val ticks = (signal.millis / 50L).coerceAtLeast(1L)
         plugin.server.scheduler.runTaskLater(plugin, Runnable {
-            val contInterp = Interpreter(ctx, emptyList())
+            val contInterp = Interpreter(ctx, emptyList(), signal.capturedScopes)
             contInterp.setGlobalVar(decl.paramsName, eventObj)
             try {
                 contInterp.executeStatements(signal.remaining)

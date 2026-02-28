@@ -6,13 +6,19 @@ import dev.terie.fascript.script.ScriptContext
 // AST를 실행하는 인터프리터입니다.
 class Interpreter(
     private val context: ScriptContext,
-    private val scriptArgs: List<FascriptValue> = emptyList()
+    private val scriptArgs: List<FascriptValue> = emptyList(),
+    capturedScopes: List<MutableMap<String, FascriptValue>> = emptyList()
 ) {
 
     // 스코프 스택. 가장 앞이 현재 스코프입니다.
     // context.globalScope를 최상위 스코프로 공유하여 인터벌 간 변수 상태를 유지합니다.
-    private val scopeStack = ArrayDeque<MutableMap<String, FascriptValue>>().also {
-        it.addFirst(context.globalScope)
+    // capturedScopes가 있으면 delay 이후 재개를 위해 지역 스코프를 복원합니다.
+    private val scopeStack = ArrayDeque<MutableMap<String, FascriptValue>>().also { deque ->
+        deque.addFirst(context.globalScope)
+        // capturedScopes는 [안쪽→바깥쪽] 순서이므로, 역순으로 addFirst하면 올바른 스택이 됩니다.
+        for (scope in capturedScopes.reversed()) {
+            deque.addFirst(scope)
+        }
     }
 
     // 프로그램을 실행합니다.
@@ -57,7 +63,10 @@ class Interpreter(
             if (stmt is CallNode && stmt.name == "delay") {
                 val ms = evalExpr(stmt.args.firstOrNull()
                     ?: throw FascriptRuntimeError("delay()에는 밀리초 인자가 필요합니다.")).toNumber().toLong()
-                throw DelaySignal(ms, statements.drop(i + 1))
+                // 전역 스코프를 제외한 지역 스코프를 스냅샷으로 캡처합니다.
+                // (안쪽→바깥쪽 순서, 전역은 마지막 요소이므로 dropLast(1))
+                val captured = scopeStack.toList().dropLast(1).map { it.toMutableMap() }
+                throw DelaySignal(ms, statements.drop(i + 1), captured)
             }
             executeStatement(stmt)
         }

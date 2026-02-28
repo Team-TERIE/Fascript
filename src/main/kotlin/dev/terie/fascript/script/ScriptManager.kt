@@ -105,7 +105,7 @@ class ScriptManager(private val plugin: FascriptPlugin) {
     ) {
         val ticks = (signal.millis / 50L).coerceAtLeast(1L)
         plugin.server.scheduler.runTaskLater(plugin, Runnable {
-            val contInterp = Interpreter(ctx, args)
+            val contInterp = Interpreter(ctx, args, signal.capturedScopes)
             try {
                 contInterp.executeStatements(signal.remaining)
             } catch (d: DelaySignal) {

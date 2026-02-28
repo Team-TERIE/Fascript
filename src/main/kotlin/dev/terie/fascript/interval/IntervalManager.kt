@@ -53,7 +53,7 @@ class IntervalManager(private val plugin: FascriptPlugin) {
     private fun scheduleDelayed(signal: DelaySignal, state: IntervalState) {
         val ticks = (signal.millis / 50L).coerceAtLeast(1L)
         plugin.server.scheduler.runTaskLater(plugin, Runnable {
-            val contInterp = Interpreter(state.ctx, emptyList())
+            val contInterp = Interpreter(state.ctx, emptyList(), signal.capturedScopes)
             try {
                 contInterp.executeStatements(signal.remaining)
             } catch (d: DelaySignal) {
