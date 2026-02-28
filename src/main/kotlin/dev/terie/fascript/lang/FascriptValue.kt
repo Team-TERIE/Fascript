@@ -10,7 +10,7 @@ sealed class FascriptValue {
     data class FObject(val v: MutableMap<String, FascriptValue>) : FascriptValue()
     object FNull : FascriptValue()
 
-    override fun toString(): String = when (this) {
+    final override fun toString(): String = when (this) {
         is FNumber  -> if (v % 1.0 == 0.0) v.toLong().toString() else v.toString()
         is FString  -> v
         is FBoolean -> v.toString()
