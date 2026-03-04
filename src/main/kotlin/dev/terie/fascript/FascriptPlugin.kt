@@ -134,23 +134,26 @@ class FascriptPlugin : JavaPlugin() {
             if (playerName != null) {
                 Bukkit.getPlayerExact(playerName)?.performCommand(cmd)
             } else {
-                val silentSender = object : org.bukkit.command.ConsoleCommandSender by Bukkit.getConsoleSender() {
-                    override fun sendMessage(message: String) = Unit
-                    override fun sendMessage(vararg messages: String) = Unit
-                    override fun sendMessage(senderId: java.util.UUID?, message: String) = Unit
-                    override fun sendMessage(senderId: java.util.UUID?, vararg messages: String) = Unit
-                    override fun sendMessage(message: net.kyori.adventure.text.Component) = Unit
-                    override fun sendMessage(source: net.kyori.adventure.identity.Identity, message: net.kyori.adventure.text.Component, type: net.kyori.adventure.audience.MessageType) = Unit
-                    override fun sendMessage(source: net.kyori.adventure.identity.Identified, message: net.kyori.adventure.text.Component, type: net.kyori.adventure.audience.MessageType) = Unit
-                    override fun sendPlainMessage(message: String) = Unit
-                    override fun sendRichMessage(message: String) = Unit
-                    override fun sendActionBar(message: net.kyori.adventure.text.Component) = Unit
-                    override fun spigot() = object : org.bukkit.command.CommandSender.Spigot() {
-                        override fun sendMessage(vararg components: net.md_5.bungee.api.chat.BaseComponent) = Unit
-                        override fun sendMessage(sender: java.util.UUID?, vararg components: net.md_5.bungee.api.chat.BaseComponent) = Unit
-                    }
+                try {
+                    val server = Bukkit.getServer()
+                    val craftServerClass = server.javaClass
+                    val getServerMethod = craftServerClass.getMethod("getServer")
+                    val dedicatedServer = getServerMethod.invoke(server)
+                    val createStackMethod = dedicatedServer.javaClass.getMethod("createCommandSourceStack")
+                    val sourceStack = createStackMethod.invoke(dedicatedServer)
+                    val withSuppressedMethod = sourceStack.javaClass.getMethod("withSuppressedOutput")
+                    val silentStack = withSuppressedMethod.invoke(sourceStack)
+                    val commandsField = dedicatedServer.javaClass.superclass.getDeclaredField("vanillaCommandDispatcher")
+                    commandsField.isAccessible = true
+                    val commands = commandsField.get(dedicatedServer)
+                    val dispatcherField = commands.javaClass.getDeclaredField("dispatcher")
+                    dispatcherField.isAccessible = true
+                    @Suppress("UNCHECKED_CAST")
+                    val dispatcher = dispatcherField.get(commands) as com.mojang.brigadier.CommandDispatcher<Any>
+                    dispatcher.execute(cmd, silentStack)
+                } catch (_: Exception) {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
                 }
-                Bukkit.dispatchCommand(silentSender, cmd)
             }
             FascriptValue.FNull
         }
