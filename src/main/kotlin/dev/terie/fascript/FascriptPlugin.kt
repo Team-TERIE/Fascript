@@ -142,6 +142,9 @@ class FascriptPlugin : JavaPlugin() {
                     override fun sendMessage(message: net.kyori.adventure.text.Component) = Unit
                     override fun sendMessage(source: net.kyori.adventure.identity.Identity, message: net.kyori.adventure.text.Component, type: net.kyori.adventure.audience.MessageType) = Unit
                     override fun sendMessage(source: net.kyori.adventure.identity.Identified, message: net.kyori.adventure.text.Component, type: net.kyori.adventure.audience.MessageType) = Unit
+                    override fun sendPlainMessage(message: String) = Unit
+                    override fun sendRichMessage(message: String) = Unit
+                    override fun sendActionBar(message: net.kyori.adventure.text.Component) = Unit
                     override fun spigot() = object : org.bukkit.command.CommandSender.Spigot() {
                         override fun sendMessage(vararg components: net.md_5.bungee.api.chat.BaseComponent) = Unit
                         override fun sendMessage(sender: java.util.UUID?, vararg components: net.md_5.bungee.api.chat.BaseComponent) = Unit
