@@ -134,27 +134,43 @@ class FascriptPlugin : JavaPlugin() {
             if (playerName != null) {
                 Bukkit.getPlayerExact(playerName)?.performCommand(cmd)
             } else {
-                try {
-                    val server = Bukkit.getServer()
-                    val craftServerClass = server.javaClass
-                    val getServerMethod = craftServerClass.getMethod("getServer")
-                    val dedicatedServer = getServerMethod.invoke(server)
-                    val createStackMethod = dedicatedServer.javaClass.getMethod("createCommandSourceStack")
-                    val sourceStack = createStackMethod.invoke(dedicatedServer)
-                    val withSuppressedMethod = sourceStack.javaClass.getMethod("withSuppressedOutput")
-                    val silentStack = withSuppressedMethod.invoke(sourceStack)
-                    val commandsField = dedicatedServer.javaClass.superclass.getDeclaredField("vanillaCommandDispatcher")
-                    commandsField.isAccessible = true
-                    val commands = commandsField.get(dedicatedServer)
-                    val dispatcherField = commands.javaClass.getDeclaredField("dispatcher")
-                    dispatcherField.isAccessible = true
-                    @Suppress("UNCHECKED_CAST")
-                    val dispatcher = dispatcherField.get(commands) as com.mojang.brigadier.CommandDispatcher<Any>
-                    dispatcher.execute(cmd, silentStack)
-                } catch (_: Exception) {
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
-                }
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
             }
+            FascriptValue.FNull
+        }
+
+        BuiltinRegistry.register("setblock") { args, _ ->
+            val x = (args.getOrNull(0) as? FascriptValue.FNumber)?.value?.toInt() ?: return@register FascriptValue.FNull
+            val y = (args.getOrNull(1) as? FascriptValue.FNumber)?.value?.toInt() ?: return@register FascriptValue.FNull
+            val z = (args.getOrNull(2) as? FascriptValue.FNumber)?.value?.toInt() ?: return@register FascriptValue.FNull
+            val block = args.getOrNull(3)?.toString() ?: return@register FascriptValue.FNull
+            val world = Bukkit.getWorlds().firstOrNull() ?: return@register FascriptValue.FNull
+            val location = org.bukkit.Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+            val blockData = Bukkit.createBlockData(if (block.contains(":")) block else "minecraft:$block")
+            location.block.blockData = blockData
+            FascriptValue.FNull
+        }
+
+        BuiltinRegistry.register("localSound") { args, _ ->
+            val playerName = args.getOrNull(0)?.toString() ?: return@register FascriptValue.FNull
+            val soundId = args.getOrNull(1)?.toString() ?: return@register FascriptValue.FNull
+            val volume = (args.getOrNull(2) as? FascriptValue.FNumber)?.value?.toFloat() ?: 1.0f
+            val pitch = (args.getOrNull(3) as? FascriptValue.FNumber)?.value?.toFloat() ?: 1.0f
+            val player = Bukkit.getPlayerExact(playerName) ?: return@register FascriptValue.FNull
+            player.playSound(player.location, soundId, org.bukkit.SoundCategory.MASTER, volume, pitch)
+            FascriptValue.FNull
+        }
+
+        BuiltinRegistry.register("worldSound") { args, _ ->
+            val x = (args.getOrNull(0) as? FascriptValue.FNumber)?.value?.toDouble() ?: return@register FascriptValue.FNull
+            val y = (args.getOrNull(1) as? FascriptValue.FNumber)?.value?.toDouble() ?: return@register FascriptValue.FNull
+            val z = (args.getOrNull(2) as? FascriptValue.FNumber)?.value?.toDouble() ?: return@register FascriptValue.FNull
+            val soundId = args.getOrNull(3)?.toString() ?: return@register FascriptValue.FNull
+            val volume = (args.getOrNull(4) as? FascriptValue.FNumber)?.value?.toFloat() ?: 1.0f
+            val pitch = (args.getOrNull(5) as? FascriptValue.FNumber)?.value?.toFloat() ?: 1.0f
+            val world = Bukkit.getWorlds().firstOrNull() ?: return@register FascriptValue.FNull
+            val location = org.bukkit.Location(world, x, y, z)
+            world.playSound(location, soundId, org.bukkit.SoundCategory.MASTER, volume, pitch)
             FascriptValue.FNull
         }
 
