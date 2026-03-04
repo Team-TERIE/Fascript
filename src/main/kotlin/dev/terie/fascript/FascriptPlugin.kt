@@ -22,6 +22,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.UUID
 
+
 class FascriptPlugin : JavaPlugin() {
 
     lateinit var scriptManager: ScriptManager
