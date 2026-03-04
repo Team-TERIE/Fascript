@@ -43,6 +43,7 @@ class Parser(private val tokens: List<Token>) {
             TokenType.IF        -> parseIf()
             TokenType.FOREACH   -> parseForeach()
             TokenType.WHILE     -> parseWhile()
+            TokenType.THREAD    -> parseThread()
             TokenType.RETURN    -> parseReturn()
             TokenType.BREAK     -> { advance(); BreakNode() }
             TokenType.IDENTIFIER -> parseIdentifierStatement()
@@ -205,6 +206,16 @@ class Parser(private val tokens: List<Token>) {
         expect(TokenType.RPAREN)
         val body = parseBlock()
         return WhileNode(condition, body)
+    }
+
+    // thread (N) { ... }
+    private fun parseThread(): ThreadNode {
+        expect(TokenType.THREAD)
+        expect(TokenType.LPAREN)
+        val channelCount = parseExpression()
+        expect(TokenType.RPAREN)
+        val body = parseBlock()
+        return ThreadNode(channelCount, body)
     }
 
     private fun parseReturn(): ReturnNode {

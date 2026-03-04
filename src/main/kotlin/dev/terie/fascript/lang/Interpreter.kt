@@ -14,6 +14,7 @@ class Interpreter(
     // 설정된 경우, callUserFunction에서 DelaySignal을 상위로 전파하지 않고
     // 이 콜백으로 예약한 뒤 호출부(인터벌 바디 등)가 계속 실행됩니다.
     internal var delayScheduler: ((DelaySignal) -> Unit)? = null
+    internal var isAsync = false
 
     // 스코프 스택. 가장 앞이 현재 스코프입니다.
     // context.globalScope를 최상위 스코프로 공유하여 인터벌 간 변수 상태를 유지합니다.
@@ -89,6 +90,7 @@ class Interpreter(
             is ForeachNode   -> executeForeach(node)
             is ReturnNode    -> throw ReturnSignal(node.value?.let { evalExpr(it) } ?: FascriptValue.FNull)
             is BreakNode     -> throw BreakSignal()
+            is ThreadNode    -> executeThread(node)
             is CallNode      -> executeCall(node)
             else             -> evalExpr(node) // 표현식을 구문으로 사용
         }
@@ -232,6 +234,47 @@ class Interpreter(
             executeStatements(statements)
         } finally {
             popScope()
+        }
+    }
+
+    // --- 병렬 실행 ---
+
+    private fun executeThread(node: ThreadNode) {
+        val channelCount = evalExpr(node.channelCount).toNumber().toInt().coerceAtLeast(1)
+        // 본문의 구문들을 채널 수만큼 라운드로빈으로 분배합니다.
+        val channels = Array(channelCount) { mutableListOf<Node>() }
+        val shuffled = node.body.shuffled()
+        shuffled.forEachIndexed { i, stmt ->
+            channels[i % channelCount].add(stmt)
+        }
+        // 각 채널을 별도 스레드에서 실행합니다.
+        val captured = scopeStack.toList().map { it.toMutableMap() }
+        val plugin = context.plugin
+        for (channel in channels) {
+            if (channel.isEmpty()) continue
+            plugin.server.scheduler.runTaskAsynchronously(plugin, Runnable {
+                val channelInterp = Interpreter(context, emptyList(), captured.dropLast(1))
+                channelInterp.isAsync = true
+                channelInterp.delayScheduler = { d ->
+                    // delay 이후 남은 구문을 메인 스레드에서 예약 실행합니다.
+                    val ticks = (d.millis / 50L).coerceAtLeast(1L)
+                    plugin.server.scheduler.runTaskLater(plugin, Runnable {
+                        val contInterp = Interpreter(context, emptyList(), d.capturedScopes)
+                        contInterp.isAsync = false
+                        contInterp.delayScheduler = delayScheduler
+                        try {
+                            contInterp.executeStatements(d.remaining)
+                        } catch (d2: DelaySignal) {
+                            delayScheduler?.invoke(d2)
+                        }
+                    }, ticks)
+                }
+                try {
+                    channelInterp.executeStatements(channel)
+                } catch (d: DelaySignal) {
+                    channelInterp.delayScheduler?.invoke(d)
+                }
+            })
         }
     }
 

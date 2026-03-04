@@ -180,6 +180,7 @@ class Lexer(private val source: String) {
             "break"   to TokenType.BREAK,
             "listener" to TokenType.LISTENER,
             "interval" to TokenType.INTERVAL,
+            "thread"  to TokenType.THREAD,
             "true"    to TokenType.BOOLEAN,
             "false"   to TokenType.BOOLEAN,
         )

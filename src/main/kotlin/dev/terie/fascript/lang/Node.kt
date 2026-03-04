@@ -83,6 +83,12 @@ data class WhileNode(
     val body: List<Node>
 ) : Node()
 
+// thread (N) { ... } 병렬 실행 블록
+data class ThreadNode(
+    val channelCount: Node,
+    val body: List<Node>
+) : Node()
+
 // --- 표현식 ---
 
 data class NumberLiteralNode(val value: Double) : Node()

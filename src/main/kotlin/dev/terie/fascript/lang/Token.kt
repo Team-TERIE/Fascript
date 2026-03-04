@@ -21,7 +21,7 @@ enum class TokenType {
     IF, ELSE, FOREACH, IN, WHILE, BREAK,
 
     // 스크립트 구조 키워드
-    LISTENER, INTERVAL,
+    LISTENER, INTERVAL, THREAD,
 
     // 연산자 - 산술
     PLUS, MINUS, STAR, SLASH, PERCENT,
