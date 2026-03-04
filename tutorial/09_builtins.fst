@@ -34,6 +34,32 @@ object entity = getEntityData(uuid)
 // 플레이어: entity["gameMode"], entity["level"], entity["food"]
 //           entity["exp"], entity["flying"], entity["op"]
 
+// ── 블록 설치 ──────────────────────────────────────────
+// setblock(x, y, z, 블록ID)
+// 지정한 좌표에 블록을 설치합니다.
+// 블록 ID는 minecraft: 네임스페이스를 생략할 수 있습니다.
+// 블록 상태(BlockState)는 대괄호로 표기합니다.
+
+setblock(0, 64, 0, "stone")                      // 돌 설치
+setblock(0, 64, 0, "sea_lantern")                // 씨 랜턴 설치
+setblock(0, 64, 0, "air")                        // 블록 제거
+setblock(0, 64, 0, "end_rod[facing=south]")      // 블록 상태 지정
+setblock(0, 64, 0, "minecraft:quartz_block")     // 네임스페이스 명시
+
+// ── 사운드 재생 ─────────────────────────────────────────
+// worldSound(x, y, z, 사운드ID, 볼륨, 피치)
+// 지정한 좌표에서 소리를 재생합니다. 범위 내 모든 플레이어에게 들립니다.
+// 채널은 master로 고정됩니다.
+
+worldSound(0, 64, 0, "minecraft:block.note_block.pling", 1.0, 1.0)
+worldSound(0, 64, 0, "presencefootsteps:pf_presence.glass.glass_hit", 0.1, 0.25)
+
+// localSound(플레이어명, 사운드ID, 볼륨, 피치)
+// 지정한 플레이어에게만 소리를 재생합니다. 채널은 master로 고정됩니다.
+
+localSound("BACKGWA", "minecraft:entity.player.levelup", 1.0, 1.0)
+localSound("BACKGWA", "minecraft:block.chest.open", 0.5, 1.2)
+
 // ── 스토리지 (→ 08_storage.fst 참고) ──────────────────
 // setGlobalStorage(key, value) / getGlobalStorage(key)
 // setStorage(key, value)       / getStorage(key)
