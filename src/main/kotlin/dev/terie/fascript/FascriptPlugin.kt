@@ -233,6 +233,26 @@ class FascriptPlugin : JavaPlugin() {
             FascriptValue.FList(names.toMutableList())
         }
 
+        BuiltinRegistry.register("listContains") { args, _ ->
+            val list = args.getOrNull(0) as? FascriptValue.FList ?: return@register FascriptValue.FBoolean(false)
+            val item = args.getOrNull(1) ?: FascriptValue.FNull
+            FascriptValue.FBoolean(list.v.any { it.toString() == item.toString() })
+        }
+
+        BuiltinRegistry.register("listAdd") { args, _ ->
+            val list = args.getOrNull(0) as? FascriptValue.FList ?: return@register FascriptValue.FNull
+            val item = args.getOrNull(1) ?: FascriptValue.FNull
+            list.v.add(item)
+            FascriptValue.FNull
+        }
+
+        BuiltinRegistry.register("listRemove") { args, _ ->
+            val list = args.getOrNull(0) as? FascriptValue.FList ?: return@register FascriptValue.FNull
+            val item = args.getOrNull(1) ?: FascriptValue.FNull
+            list.v.removeIf { it.toString() == item.toString() }
+            FascriptValue.FNull
+        }
+
         BuiltinRegistry.register("getPlayerUUID") { args, _ ->
             val playerName = args.firstOrNull()?.toString() ?: return@register FascriptValue.FNull
             val player = Bukkit.getPlayerExact(playerName) ?: return@register FascriptValue.FNull
