@@ -78,16 +78,24 @@ class Lexer(private val source: String) {
             // 이스케이프 처리
             if (source[pos] == '\\' && pos + 1 < source.length) {
                 pos++
-                sb.append(
-                    when (source[pos]) {
-                        'n'  -> '\n'
-                        't'  -> '\t'
-                        '\\' -> '\\'
-                        '"'  -> '"'
-                        '\'' -> '\''
-                        else -> source[pos]
+                when (source[pos]) {
+                    'n'  -> sb.append('\n')
+                    't'  -> sb.append('\t')
+                    '\\' -> sb.append('\\')
+                    '"'  -> sb.append('"')
+                    '\'' -> sb.append('\'')
+                    'u'  -> {
+                        val hex = source.substring(pos + 1, minOf(pos + 5, source.length))
+                        val code = hex.toIntOrNull(16)
+                        if (hex.length == 4 && code != null) {
+                            sb.append(code.toChar())
+                            pos += 4
+                        } else {
+                            sb.append('u')
+                        }
                     }
-                )
+                    else -> sb.append(source[pos])
+                }
             } else {
                 sb.append(source[pos])
             }
