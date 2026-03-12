@@ -404,8 +404,15 @@ class Interpreter(
         for (scope in scopeStack) {
             if (scope.containsKey(name)) {
                 scope[name] = value
+                // public 변수면 전역 레지스트리도 함께 갱신합니다.
+                if (GlobalRegistry.variables.containsKey(name)) GlobalRegistry.variables[name] = value
                 return
             }
+        }
+        // 로컬에 없으면 public 전역 변수인지 확인합니다.
+        if (GlobalRegistry.variables.containsKey(name)) {
+            GlobalRegistry.variables[name] = value
+            return
         }
         // 없으면 현재 스코프에 추가합니다.
         scopeStack.first()[name] = value
