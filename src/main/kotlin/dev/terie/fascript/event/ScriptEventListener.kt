@@ -6,6 +6,7 @@ import dev.terie.fascript.lang.FascriptRuntimeError
 import dev.terie.fascript.lang.FascriptValue
 import dev.terie.fascript.lang.Interpreter
 import dev.terie.fascript.lang.ListenerDeclNode
+import dev.terie.fascript.lang.ReturnSignal
 import dev.terie.fascript.script.ScriptContext
 import dev.terie.fascript.util.MessageUtil
 import org.bukkit.event.EventPriority
@@ -44,6 +45,8 @@ class ScriptEventListener(
             interp.executeStatements(decl.body)
         } catch (d: DelaySignal) {
             scheduleDelayed(d, eventObj)
+        } catch (_: ReturnSignal) {
+            return
         } catch (e: FascriptRuntimeError) {
             MessageUtil.runtimeDiagnostic(ctx.scriptName, "리스너/${decl.eventType}", "런타임 오류", e.message ?: "오류")
                 .forEach { plugin.componentLogger.warn(it) }
@@ -60,6 +63,8 @@ class ScriptEventListener(
                 contInterp.executeStatements(signal.remaining)
             } catch (d: DelaySignal) {
                 scheduleDelayed(d, eventObj)
+            } catch (_: ReturnSignal) {
+                return@Runnable
             } catch (e: FascriptRuntimeError) {
                 MessageUtil.runtimeDiagnostic(ctx.scriptName, "리스너/${decl.eventType} (delay 이후)", "런타임 오류", e.message ?: "오류")
                     .forEach { plugin.componentLogger.warn(it) }
